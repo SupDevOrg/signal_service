@@ -4,10 +4,18 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Копируем ТОЛЬКО csproj сначала (для кэширования слоя restore)
 COPY ["signal_service.csproj", "./"]
-RUN dotnet restore
+
+# Восстанавливаем пакеты с флагами для CI/CD среды
+RUN dotnet restore "signal_service.csproj" --disable-parallel --force-evaluate --verbosity minimal
+
+# Копируем весь исходный код
 COPY . .
-RUN dotnet publish -c Release -o /app/publish
+
+# Публикуем
+RUN dotnet publish "signal_service.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app
