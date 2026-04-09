@@ -1,6 +1,3 @@
-[build]
-builder = "DOCKERFILE"
-
 [deploy]
 startCommand = "dotnet SignalingServer.dll"
 # Путь для проверки жив ли сервис. Railway будет стучаться сюда.
