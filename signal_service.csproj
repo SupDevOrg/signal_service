@@ -1,12 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>signal_service</AssemblyName>
-    <RootNamespace>signal_service</RootNamespace>
-  </PropertyGroup>
+      <TargetFramework>net8.0</TargetFramework>
+      <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <!-- Важно: имя сборки должно совпадать с ENTRYPOINT -->
+      <AssemblyName>signal_service</AssemblyName>
+      <RootNamespace>signal_service</RootNamespace>
+    </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.WebSockets" Version="2.3.9" />
