@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "pnQTCbYsLKc=",
+  "success": true,
+  "projectFilePath": "D:\\projects\\Sup\\signal_service\\signal_service.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ilia\\.nuget\\packages\\microsoft.aspnetcore.websockets\\2.3.9\\microsoft.aspnetcore.websockets.2.3.9.nupkg.sha512",
+    "C:\\Users\\Ilia\\.nuget\\packages\\system.net.websockets.websocketprotocol\\5.1.0\\system.net.websockets.websocketprotocol.5.1.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1510",
+      "level": "Warning",
+      "message": "PackageReference Microsoft.AspNetCore.WebSockets не будет урезано. Рассмотрите возможность удаления этого пакета из зависимостей, так как он, вероятно, не требуется.",
+      "projectPath": "D:\\projects\\Sup\\signal_service\\signal_service.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\projects\\Sup\\signal_service\\signal_service.csproj",
+      "libraryId": "Microsoft.AspNetCore.WebSockets",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}
