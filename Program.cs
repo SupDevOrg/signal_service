@@ -79,6 +79,8 @@ app.Map("/ws", async context =>
     }
 });
 
+app.MapGet("/ping", () => "ok");
+
 app.Run();
 
 record ClientInfo(string Id, WebSocket Socket);
