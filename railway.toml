@@ -1,6 +1,4 @@
 [deploy]
-startCommand = "dotnet SignalingServer.dll"
-# Путь для проверки жив ли сервис. Railway будет стучаться сюда.
 healthcheckPath = "/ping"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
