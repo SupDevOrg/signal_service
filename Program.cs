@@ -12,8 +12,8 @@ builder.WebHost.ConfigureKestrel((context, serverOptions) =>
 
 var app = builder.Build();
 
-// Хранилище подключений: RoomId -> Список клиентов
-var rooms = new ConcurrentDictionary<string, List<ClientInfo>>();
+// Хранилище подключений: RoomId -> (ClientId -> ClientInfo)
+var rooms = new ConcurrentDictionary<string, ConcurrentDictionary<string, ClientInfo>>();
 
 app.UseWebSockets();
 
@@ -34,18 +34,24 @@ app.Map("/ws", async context =>
 
     // Добавляем в комнату
     var clientInfo = new ClientInfo(clientId, socket);
-    rooms.AddOrUpdate(roomId, _ => new List<ClientInfo> { clientInfo }, (_, list) => 
-    {
-        list.Add(clientInfo);
-        return list;
-    });
+    var room = rooms.GetOrAdd(roomId, _ => new ConcurrentDictionary<string, ClientInfo>());
+    room[clientId] = clientInfo;
 
     try
     {
         var buffer = new byte[4096];
         while (socket.State == WebSocketState.Open)
         {
-            var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            WebSocketReceiveResult result;
+            try
+            {
+                result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            }
+            catch (WebSocketException)
+            {
+                // Remote party closed without a proper close handshake — treat as disconnect
+                break;
+            }
 
             if (result.MessageType == WebSocketMessageType.Close) break;
 
@@ -54,17 +60,14 @@ app.Map("/ws", async context =>
             // Отправляем сообщение ВСЕМ в комнате, кроме отправителя
             if (rooms.TryGetValue(roomId, out var clients))
             {
-                foreach (var client in clients)
-                {
-                    if (client.Id != clientId && client.Socket.State == WebSocketState.Open)
-                    {
-                        await client.Socket.SendAsync(
-                            new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)), 
-                            WebSocketMessageType.Text, 
-                            true, 
-                            CancellationToken.None);
-                    }
-                }
+                var sendTasks = clients.Values
+                    .Where(c => c.Id != clientId && c.Socket.State == WebSocketState.Open)
+                    .Select(c => c.Socket.SendAsync(
+                        new ArraySegment<byte>(Encoding.UTF8.GetBytes(message)),
+                        WebSocketMessageType.Text,
+                        true,
+                        CancellationToken.None));
+                await Task.WhenAll(sendTasks);
             }
         }
     }
@@ -73,8 +76,8 @@ app.Map("/ws", async context =>
         // Чистка при отключении
         if (rooms.TryGetValue(roomId, out var clients))
         {
-            clients.Remove(clientInfo);
-            if (clients.Count == 0) rooms.TryRemove(roomId, out _);
+            clients.TryRemove(clientId, out _);
+            if (clients.IsEmpty) rooms.TryRemove(roomId, out _);
         }
     }
 });
